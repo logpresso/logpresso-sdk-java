@@ -514,14 +514,21 @@ public class Logpresso implements TrapListener, Closeable {
 	}
 
 	public void createUser(User user) throws IOException {
+		checkNotNull("user", user);
+		checkNotNull("user.loginName", user.getLoginName());
+		checkNotNull("user.name", user.getName());
+		checkNotNull("user.password", user.getPassword());
 		rpc("com.logpresso.core.msgbus.UserPlugin.createUser", user.toMap());
 	}
 
 	public void updateUser(User user) throws IOException {
+		checkNotNull("user.loginName", user.getLoginName());
+		checkNotNull("user.name", user.getName());
 		rpc("com.logpresso.core.msgbus.UserPlugin.updateUser", user.toMap());
 	}
 
 	public void removeUser(String loginName) throws IOException {
+		checkNotNull("loginName", loginName);
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("login_name", loginName);
 		rpc("org.araqne.dom.msgbus.UserPlugin.removeUser", params);
@@ -529,6 +536,7 @@ public class Logpresso implements TrapListener, Closeable {
 
 	@SuppressWarnings("unchecked")
 	public List<String> removeUsers(List<String> loginNames) throws IOException {
+		checkNotNull("loginNames", loginNames);
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("login_names", loginNames);
 		Message resp = rpc("org.araqne.dom.msgbus.UserPlugin.removeUsers", params);
