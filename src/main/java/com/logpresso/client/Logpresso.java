@@ -638,7 +638,7 @@ public class Logpresso implements TrapListener, Closeable {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("guid", guid);
 		Message resp = rpc("org.araqne.logdb.msgbus.ManagementPlugin.getSecurityGroup", params);
-		Map<String, Object> o = (Map<String, Object>) resp.get("group");
+		Map<String, Object> o = (Map<String, Object>) resp.get("security_group");
 		if (o == null)
 			return null;
 
