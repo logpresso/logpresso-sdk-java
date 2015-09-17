@@ -13,6 +13,7 @@ public class User {
 	private String password;
 
 	// optional parameters
+	private String department;
 	private String description;
 	private String otpSeed;
 	private String title;
@@ -48,6 +49,7 @@ public class User {
 		m.put("name", name);
 		m.put("description", description);
 		m.put("password", password);
+		m.put("org_unit_name", department);
 		m.put("otp_seed", otpSeed);
 		m.put("hash_type", hashType);
 		m.put("title", title);
@@ -107,6 +109,14 @@ public class User {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public String getDepartment() {
+		return department;
+	}
+
+	public void setDepartment(String department) {
+		this.department = department;
 	}
 
 	public String getOtpSeed() {
