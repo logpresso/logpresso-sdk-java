@@ -18,7 +18,7 @@ package com.logpresso.client;
 import java.io.IOException;
 
 /**
- * 로그 DB 트랜스포트는 주어진 접속 정보로 새로운 로그프레소 세션 개체를 생성합니다.
+ * 트랜스포트는 주어진 접속 정보로 새로운 로그프레소 세션 개체를 생성합니다.
  * 
  * @since 0.5.0
  * @author xeraph@eediom.com

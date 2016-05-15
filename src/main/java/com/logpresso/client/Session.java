@@ -22,7 +22,7 @@ import java.util.concurrent.TimeoutException;
 import com.logpresso.client.http.impl.TrapListener;
 
 /**
- * 로그 DB 세션 인터페이스는 로그프레소 접속 및 RPC 통신에 필요한 명세를 제공합니다.
+ * 세션 인터페이스는 로그프레소 접속 및 RPC 통신에 필요한 명세를 제공합니다.
  * 
  * @since 0.5.0
  * @author xeraph@eediom.com

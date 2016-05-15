@@ -157,7 +157,7 @@ public class Index {
 	/**
 	 * 레벨 0 블룸필터의 오류율을 반환합니다.
 	 * 
-	 * @return 레벨 0 블룸필터의 오류율 (0 < x < 1)
+	 * @return 레벨 0 블룸필터의 오류율 (0 &lt; x &lt; 1)
 	 */
 	public double getBloomFilterErrorRate0() {
 		return bloomFilterErrorRate0;
@@ -167,7 +167,7 @@ public class Index {
 	 * 레벨 0 블룸필터의 오류율을 반환합니다.
 	 * 
 	 * @param bloomFilterErrorRate0
-	 *            레벨 0 블룸필터의 오류율 (0 < x < 1)
+	 *            레벨 0 블룸필터의 오류율 (0 &lt; x &lt; 1)
 	 */
 	public void setBloomFilterErrorRate0(double bloomFilterErrorRate0) {
 		this.bloomFilterErrorRate0 = bloomFilterErrorRate0;
@@ -195,7 +195,7 @@ public class Index {
 	/**
 	 * 레벨 1 블룸필터의 오류율을 반환합니다.
 	 * 
-	 * @return 레벨 1 블룸필터의 오류율 (0 < x < 1)
+	 * @return 레벨 1 블룸필터의 오류율 (0 &lt; x &lt; 1)
 	 */
 	public double getBloomFilterErrorRate1() {
 		return bloomFilterErrorRate1;
@@ -205,7 +205,7 @@ public class Index {
 	 * 레벨 1 블룸필터의 오류율을 반환합니다.
 	 * 
 	 * @param bloomFilterErrorRate1
-	 *            레벨 1 블룸필터의 오류율 (0 < x < 1)
+	 *            레벨 1 블룸필터의 오류율 (0 &lt; x &lt; 1)
 	 */
 	public void setBloomFilterErrorRate1(double bloomFilterErrorRate1) {
 		this.bloomFilterErrorRate1 = bloomFilterErrorRate1;
