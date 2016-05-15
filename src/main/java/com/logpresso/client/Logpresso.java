@@ -2276,8 +2276,14 @@ public class Logpresso implements TrapListener, Closeable {
 		p.setQueryString((String) m.get("query_string"));
 		p.setParameters(parameters);
 		p.setOwner((String) m.get("owner"));
-		p.setGrantLogins(new HashSet<String>((List<String>) m.get("grants")));
-		p.setGrantGroups(new HashSet<String>((List<String>) m.get("grant_groups")));
+		
+		// support backward compatibility
+		if (m.get("grants") != null)
+			p.setGrantLogins(new HashSet<String>((List<String>) m.get("grants")));
+		
+		if (m.get("grant_groups") != null)
+			p.setGrantGroups(new HashSet<String>((List<String>) m.get("grant_groups")));
+		
 		p.setCreated(df.parse((String) m.get("created"), new ParsePosition(0)));
 		p.setModified(df.parse((String) m.get("modified"), new ParsePosition(0)));
 		return p;
