@@ -70,6 +70,9 @@ $ java -jar logpresso-sdk-java-1.0.0-package.jar -e "system logdisk | stats sum(
 
 **출력 결과**
 ```
-"test","300"
-"test2","358"
+"sys_mem_logs","617508"
+"sys_cpu_logs","301374"
+"sys_table_trends","207410"
+"sys_disk_logs","35556"
+"araqne_query_logs","28402"
 ```
