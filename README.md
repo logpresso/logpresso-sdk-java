@@ -1,5 +1,9 @@
 # 로그프레소 클라이언트 SDK
 
+## 다운로드
+* [로그프레소 자바 SDK 1.0.0 다운로드](https://github.com/logpresso/logpresso-sdk-java/releases/download/1.0.0/logpresso-sdk-java-1.0.0-package.jar)
+
+
 ## 자바 API
 로그프레소 클라이언트 SDK는 자바 6 이상의 환경에서 구동되며, 쿼리 실행, 수집기, 트랜스포머, 파서, 테이블, 인덱스, 예약된 쿼리, 스트림 쿼리 관리 등 로그프레소를 원격에서 제어하는데 필요한 모든 API를 제공합니다.
 
