@@ -2276,14 +2276,14 @@ public class Logpresso implements TrapListener, Closeable {
 		p.setQueryString((String) m.get("query_string"));
 		p.setParameters(parameters);
 		p.setOwner((String) m.get("owner"));
-		
+
 		// support backward compatibility
 		if (m.get("grants") != null)
 			p.setGrantLogins(new HashSet<String>((List<String>) m.get("grants")));
-		
+
 		if (m.get("grant_groups") != null)
 			p.setGrantGroups(new HashSet<String>((List<String>) m.get("grant_groups")));
-		
+
 		p.setCreated(df.parse((String) m.get("created"), new ParsePosition(0)));
 		p.setModified(df.parse((String) m.get("modified"), new ParsePosition(0)));
 		return p;
@@ -2922,23 +2922,29 @@ public class Logpresso implements TrapListener, Closeable {
 		} else if (method.startsWith("logdb-query-")) {
 			int id = msg.getInt("id");
 			Query q = queries.get(id);
-			if (msg.getString("type").equals("eof")) {
-				q.updateCount(msg.getLong("total_count"), stamp);
+			updateQueryStatus(msg, stamp, q);
+		}
+	}
 
-				if (msg.get("error_code") != null) {
-					q.setErrorCode((Integer) msg.get("error_code"));
-					q.setErrorDetail((String) msg.get("error_detail"));
-					q.updateStatus("Cancelled", stamp);
-				} else {
-					q.updateStatus("Ended", stamp);
-				}
-			} else if (msg.getString("type").equals("page_loaded")) {
-				q.updateCount(msg.getLong("count"), stamp);
-				q.updateStatus("Running", stamp);
-			} else if (msg.getString("type").equals("status_change")) {
-				q.updateCount(msg.getLong("count"), stamp);
-				q.updateStatus(msg.getString("status"), stamp);
+	private void updateQueryStatus(Message msg, long stamp, Query q) {
+		if (msg.getString("type").equals("eof")) {
+			q.updateCount(msg.getLong("total_count"), stamp);
+
+			String cancelReason = (String) msg.get("cancel_reason");
+			if (cancelReason != null && !cancelReason.equals("PARTIAL_FETCH")) {
+				q.setCancelReason(cancelReason);
+				q.setErrorCode((Integer) msg.get("error_code"));
+				q.setErrorDetail((String) msg.get("error_detail"));
+				q.updateStatus("Cancelled", stamp);
+			} else {
+				q.updateStatus("Ended", stamp);
 			}
+		} else if (msg.getString("type").equals("page_loaded")) {
+			q.updateCount(msg.getLong("count"), stamp);
+			q.updateStatus("Running", stamp);
+		} else if (msg.getString("type").equals("status_change")) {
+			q.updateCount(msg.getLong("count"), stamp);
+			q.updateStatus(msg.getString("status"), stamp);
 		}
 	}
 
@@ -2968,6 +2974,11 @@ public class Logpresso implements TrapListener, Closeable {
 				rows.add(new Tuple((Map<String, Object>) o));
 
 			if (query != null && rs != null) {
+				if (msg.containsKey("stamp")) {
+					long stamp = Long.parseLong(msg.get("stamp").toString());
+					updateQueryStatus(msg, stamp, query);
+				}
+
 				rs.onRows(query, rows, last);
 				if (last)
 					lastCalled = true;
@@ -2984,8 +2995,12 @@ public class Logpresso implements TrapListener, Closeable {
 
 	@Override
 	public void onClose(Throwable t) {
-		for (Query q : queries.values())
+		for (Query q : queries.values()) {
 			q.updateStatus("Cancelled", Long.MAX_VALUE);
+			StreamingResultSet rs = streamCallbacks.get(q.getId());
+			if (rs != null)
+				rs.onRows(q, new ArrayList<Tuple>(), true);
+		}
 	}
 
 	private void checkNotNull(String name, Object o) {

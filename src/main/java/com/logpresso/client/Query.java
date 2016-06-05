@@ -45,6 +45,8 @@ public class Query {
 	// @since 1.0.0
 	private Integer errorCode;
 	private String errorDetail;
+	
+	private String cancelReason;
 
 	private Long elapsed;
 	private List<QueryCommand> commands = new ArrayList<QueryCommand>();
@@ -327,6 +329,14 @@ public class Query {
 
 	public void setErrorDetail(String errorDetail) {
 		this.errorDetail = errorDetail;
+	}
+
+	public String getCancelReason() {
+		return cancelReason;
+	}
+
+	public void setCancelReason(String cancelReason) {
+		this.cancelReason = cancelReason;
 	}
 
 	private class WaitingCondition {
