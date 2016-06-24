@@ -63,4 +63,18 @@ public interface Transport {
 	 * @return 새 세션 개체
 	 */
 	Session newSession(String host, int port, int connectTimeout, int readTimeout) throws IOException;
+
+	/**
+	 * 세션 접속에 사용된 호스트 정보를 반환합니다.
+	 * 
+	 * @return 세션 접속에 사용된 서버의 IP 주소 혹은 도메인 주소
+	 */
+	String getHost();
+
+	/**
+	 * 세션 접속에 사용된 호스트의 웹 포트 번호를 반환합니다.
+	 * 
+	 * @return 세션 접속에 사용된 서버의 IP 주소 혹은 도메인 주소
+	 */
+	int getPort();
 }

@@ -32,6 +32,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
@@ -84,6 +85,7 @@ import org.araqne.websocket.Base64;
  */
 public class Logpresso implements TrapListener, Closeable {
 	private static final int MAX_THROTTLE_PERMIT = 100000;
+	private static final AtomicLong instanceCnt = new AtomicLong(0);
 	private org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(Logpresso.class);
 	private Transport transport;
 	private Session session;
@@ -107,16 +109,18 @@ public class Logpresso implements TrapListener, Closeable {
 	// table name to row list mappings
 	private Map<String, List<QueuedRows>> flushBuffers = new HashMap<String, List<QueuedRows>>();
 	private CopyOnWriteArraySet<FailureListener> failureListeners = new CopyOnWriteArraySet<FailureListener>();
+	private long instanceId;
 
 	public Logpresso() {
 		this(new WebSocketTransport());
 	}
 
 	public Logpresso(Transport transport) {
+		this.instanceId = instanceCnt.getAndIncrement();
 		this.transport = transport;
 		int poolSize = Math.min(8, Runtime.getRuntime().availableProcessors());
-		this.streamingDecoder = new StreamingResultDecoder("Streaming Result Decoder", poolSize);
-		this.streamingEncoder = new StreamingResultEncoder("Streaming Result Incoder", poolSize);
+		this.streamingDecoder = new StreamingResultDecoder("Streaming Result Decoder for Client #" + instanceId, poolSize);
+		this.streamingEncoder = new StreamingResultEncoder("Streaming Result Encoder for Client #" + instanceId, poolSize);
 	}
 
 	public Locale getLocale() {
@@ -2655,7 +2659,8 @@ public class Logpresso implements TrapListener, Closeable {
 		public void start() {
 			synchronized (this) {
 				if (th == null) {
-					th = new Thread(this, String.format("Insert flush thread"));
+					String tname = "Insert Flusher for Client #" + instanceId;
+					th = new Thread(this, tname);
 					th.start();
 				}
 			}
@@ -2685,7 +2690,7 @@ public class Logpresso implements TrapListener, Closeable {
 
 		@Override
 		public void run() {
-			while (running) {
+			while (running && !isClosed()) {
 				try {
 					long started = System.nanoTime();
 					flushInternal();
@@ -2703,15 +2708,7 @@ public class Logpresso implements TrapListener, Closeable {
 
 		void shutdown() {
 			running = false;
-			synchronized (this) {
-				this.notifyAll();
-			}
-			while (!flushBuffers.isEmpty()) {
-				try {
-					th.join();
-				} catch (InterruptedException e) {
-				}
-			}
+			signal();
 		}
 
 		public void signal() {
@@ -2720,6 +2717,15 @@ public class Logpresso implements TrapListener, Closeable {
 			}
 		}
 
+		public void waitForShutdown() {
+			shutdown();
+			while (!flushBuffers.isEmpty()) {
+				try {
+					th.join();
+				} catch (InterruptedException e) {
+				}
+			}
+		}
 	}
 
 	/**
@@ -2887,20 +2893,14 @@ public class Logpresso implements TrapListener, Closeable {
 			flush();
 
 		if (flusher.get() != null)
-			flusher.get().shutdown();
+			flusher.get().waitForShutdown();
 
 		if (session != null)
 			session.close();
 
-		if (streamingDecoder != null) {
-			streamingDecoder.close();
-			streamingDecoder = null;
-		}
-
-		if (streamingEncoder != null) {
-			streamingEncoder.close();
-			streamingEncoder = null;
-		}
+		// put most of resource-disposing code in onClose(Throwable t).
+		// this method may not be called when session is closed by exception in
+		// session
 	}
 
 	@Override
@@ -2995,11 +2995,26 @@ public class Logpresso implements TrapListener, Closeable {
 
 	@Override
 	public void onClose(Throwable t) {
-		for (Query q : queries.values()) {
-			q.updateStatus("Cancelled", Long.MAX_VALUE);
-			StreamingResultSet rs = streamCallbacks.get(q.getId());
-			if (rs != null)
-				rs.onRows(q, new ArrayList<Tuple>(), true);
+		try {
+			for (Query q : queries.values()) {
+				q.updateStatus("Cancelled", Long.MAX_VALUE);
+				StreamingResultSet rs = streamCallbacks.get(q.getId());
+				if (rs != null)
+					rs.onRows(q, new ArrayList<Tuple>(), true);
+			}
+		} finally {
+			if (flusher.get() != null)
+				flusher.get().shutdown();
+
+			if (streamingDecoder != null) {
+				streamingDecoder.close();
+				streamingDecoder = null;
+			}
+
+			if (streamingEncoder != null) {
+				streamingEncoder.close();
+				streamingEncoder = null;
+			}
 		}
 	}
 
