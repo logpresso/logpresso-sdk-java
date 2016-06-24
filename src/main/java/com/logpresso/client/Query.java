@@ -45,7 +45,7 @@ public class Query {
 	// @since 1.0.0
 	private Integer errorCode;
 	private String errorDetail;
-	
+
 	private String cancelReason;
 
 	private Long elapsed;
@@ -71,6 +71,15 @@ public class Query {
 	 */
 	public int getId() {
 		return id;
+	}
+
+	/**
+	 * 쿼리 문자열을 반환합니다.
+	 * 
+	 * @return 쿼리 문자열
+	 */
+	public String getQueryString() {
+		return queryString;
 	}
 
 	/**

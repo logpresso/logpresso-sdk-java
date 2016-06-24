@@ -1036,7 +1036,7 @@ public class Logpresso implements TrapListener, Closeable {
 	 * @return 테이블 이름과 대응되는 테이블 정보
 	 */
 	@SuppressWarnings("unchecked")
-	public TableSchema getTableInfo(String tableName) throws IOException {
+	public TableSchema getTableSchema(String tableName) throws IOException {
 		Map<String, Object> params = new HashMap<String, Object>();
 		params.put("table", tableName);
 		Message resp = rpc("org.araqne.logdb.msgbus.ManagementPlugin.getTableInfo", params);

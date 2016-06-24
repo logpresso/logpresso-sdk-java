@@ -693,7 +693,7 @@ public class Console {
 		try {
 			String tableName = tokens[1];
 			if (tokens.length == 2) {
-				TableSchema table = client.getTableInfo(tableName);
+				TableSchema table = client.getTableSchema(tableName);
 				w("Table [" + table.getName() + "]");
 				w("");
 
