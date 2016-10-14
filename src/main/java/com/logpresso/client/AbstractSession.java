@@ -44,9 +44,14 @@ public abstract class AbstractSession implements Session {
 	public void login(String loginName, String password) throws IOException {
 		login(loginName, password, false);
 	}
-
+	
 	@Override
 	public void login(String loginName, String password, boolean force) throws IOException {
+		login(loginName, password, force, 30000);
+	}
+
+	@Override
+	public void login(String loginName, String password, boolean force, int timeout) throws IOException {
 		try {
 			Map<String, Object> params = new HashMap<String, Object>();
 			params.put("login_name", loginName);

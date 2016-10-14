@@ -37,7 +37,7 @@ public interface Session {
 	boolean isClosed();
 
 	/**
-	 * 로그프레소 로그인을 수행합니다.
+	 * 로그프레소 로그인을 수행합니다. 로그인 타임아웃은 30초로 지정됩니다.
 	 * 
 	 * @param loginName
 	 *            계정 이름
@@ -47,7 +47,7 @@ public interface Session {
 	void login(String loginName, String password) throws IOException;
 
 	/**
-	 * 로그프레소 로그인을 수행합니다.
+	 * 로그프레소 로그인을 수행합니다. 로그인 타임아웃은 30초로 지정됩니다.
 	 * 
 	 * @param loginName
 	 *            계정 이름
@@ -57,6 +57,20 @@ public interface Session {
 	 *            동시 접속 수 초과 시 강제로 이전 접속을 끊고 접속하려는 경우에는 true로 지정
 	 */
 	void login(String loginName, String password, boolean force) throws IOException;
+
+	/**
+	 * 로그프레소 로그인을 수행합니다. 
+	 * 
+	 * @param loginName
+	 *            계정 이름
+	 * @param password
+	 *            암호
+	 * @param force
+	 *            동시 접속 수 초과 시 강제로 이전 접속을 끊고 접속하려는 경우에는 true로 지정
+	 * @param timeout
+	 *            로그인 타임아웃
+	 */
+	void login(String loginName, String password, boolean force, int timeout) throws IOException;
 
 	/**
 	 * 로그아웃을 수행합니다.
@@ -91,7 +105,7 @@ public interface Session {
 	 * @param timeout
 	 *            밀리세컨드 단위 타임아웃
 	 * @return RPC 수행 결과를 반환합니다.
-	 * @throws TimeoutException 
+	 * @throws TimeoutException
 	 */
 	Message rpc(String method, int timeout) throws IOException, TimeoutException;
 
@@ -116,7 +130,7 @@ public interface Session {
 	 * @param timeout
 	 *            밀리세컨드 단위 타임아웃
 	 * @return RPC 수행 결과를 반환합니다.
-	 * @throws TimeoutException 
+	 * @throws TimeoutException
 	 */
 	Message rpc(Message req, int timeout) throws IOException, TimeoutException;
 
@@ -156,4 +170,5 @@ public interface Session {
 	 * 세션을 종료합니다.
 	 */
 	void close() throws IOException;
+
 }

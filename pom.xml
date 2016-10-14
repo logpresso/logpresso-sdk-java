@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>logpresso</groupId>
 	<artifactId>logpresso-sdk-java</artifactId>
-	<version>1.0.0-2</version>
+	<version>1.0.0-3</version>
 	<packaging>jar</packaging>
 	<name>Logpresso SDK for Java</name>
 
@@ -192,7 +192,7 @@
 		<dependency>
 			<groupId>org.araqne</groupId>
 			<artifactId>araqne-websocket</artifactId>
-			<version>0.2.0</version>
+			<version>0.2.8</version>
 		</dependency>
 		<dependency>
 			<groupId>org.araqne</groupId>

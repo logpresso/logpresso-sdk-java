@@ -398,7 +398,7 @@ public class Logpresso implements TrapListener, Closeable {
 			throws IOException {
 		this.session = transport.newSession(host, port, connectTimeout, readTimeout);
 		try {
-			this.session.login(loginName, password, true);
+			this.session.login(loginName, password, true, readTimeout);
 			this.session.addListener(this);
 		} catch (IOException e) {
 			this.session.close();
