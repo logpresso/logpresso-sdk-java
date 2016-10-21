@@ -2998,6 +2998,8 @@ public class Logpresso implements TrapListener, Closeable {
 		try {
 			for (Query q : queries.values()) {
 				q.updateStatus("Cancelled", Long.MAX_VALUE);
+				q.setCancelReason("NETWORK_FAILURE");
+				q.setErrorDetail(t.getMessage() != null ? t.getMessage() : t.getClass().getName());
 				StreamingResultSet rs = streamCallbacks.get(q.getId());
 				if (rs != null)
 					rs.onRows(q, new ArrayList<Tuple>(), true);

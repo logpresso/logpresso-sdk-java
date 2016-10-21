@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>logpresso</groupId>
 	<artifactId>logpresso-sdk-java</artifactId>
-	<version>1.0.0-3</version>
+	<version>1.0.0-4</version>
 	<packaging>jar</packaging>
 	<name>Logpresso SDK for Java</name>
 
