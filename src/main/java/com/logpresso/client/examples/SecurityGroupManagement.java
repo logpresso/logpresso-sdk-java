@@ -17,7 +17,6 @@ public class SecurityGroupManagement {
 	public void run() throws IOException {
 		logpresso = new Logpresso();
 		try {
-			// System.out.println("foo");
 			logpresso.connect(Settings.HOST, Settings.USER, Settings.PASSWORD);
 
 			createSecurityGroup();
@@ -49,7 +48,7 @@ public class SecurityGroupManagement {
 			System.out.println("demo security group already exists. skipping.");
 			return;
 		}
-		
+
 		group.setName("demo");
 		group.setDescription("updated description");
 		group.setAccounts(new HashSet<String>(Arrays.asList("root")));
@@ -57,7 +56,7 @@ public class SecurityGroupManagement {
 		logpresso.updateSecurityGroup(group);
 		System.out.println("updated demo security group.");
 	}
-	
+
 	private void removeSecurityGroup() throws IOException {
 		SecurityGroup group = findSecurityGroup(logpresso, "demo");
 		if (group == null) {
