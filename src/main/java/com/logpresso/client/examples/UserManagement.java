@@ -13,7 +13,7 @@ public class UserManagement {
 	public void run() throws IOException {
 		Logpresso logpresso = new Logpresso();
 		try {
-			logpresso.connect("localhost", "root", "logpresso");
+			logpresso.connect(Settings.HOST, Settings.USER, Settings.PASSWORD);
 			logpresso.createUser(newUser());
 			// logpresso.updateUser(newUser());
 			// logpresso.removeUser("xeraph");
