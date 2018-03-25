@@ -16,6 +16,7 @@
 package com.logpresso.client;
 
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -31,6 +32,9 @@ public class Query {
 	private Logpresso client;
 	private int id;
 	private String queryString;
+	private String source;
+	private String loginName;
+	private InetAddress remoteIp;
 	private String status;
 	private long loadedCount;
 	private boolean background;
@@ -71,6 +75,69 @@ public class Query {
 	 */
 	public int getId() {
 		return id;
+	}
+
+	/**
+	 * 쿼리 생성 모듈을 반환합니다. webconsole, webapp, pivot, adhoc, batch-rule,
+	 * scheduled-query, java-client, rest-api, system
+	 * 
+	 * @since 1.0.1
+	 * @return 쿼리 생성 모듈
+	 */
+	public String getSource() {
+		return source;
+	}
+
+	/**
+	 * 쿼리 생성 모듈 값을 설정합니다.
+	 * 
+	 * @since 1.0.1
+	 * @param source
+	 *            쿼리 생성 모듈
+	 */
+	public void setSource(String source) {
+		this.source = source;
+	}
+
+	/**
+	 * 쿼리를 생성한 로그인 계정을 반환합니다.
+	 * 
+	 * @since 1.0.1
+	 * @return 로그인 계정
+	 */
+	public String getLoginName() {
+		return loginName;
+	}
+
+	/**
+	 * 쿼리를 생성한 로그인 계정을 설정합니다.
+	 * 
+	 * @since 1.0.1
+	 * @return 로그인 계정
+	 */
+	public void setLoginName(String loginName) {
+		this.loginName = loginName;
+	}
+
+	/**
+	 * 쿼리를 요청한 원격지 IP 주소를 반환합니다.
+	 * 
+	 * @since 1.0.1
+	 * @return 원격지 IP 주소
+	 */
+	public InetAddress getRemoteIp() {
+		return remoteIp;
+	}
+
+	/**
+	 * 쿼리를 요청한 원격지 IP 주소를 설정합니다.
+	 * 
+	 * @since 1.0.1
+	 * @param remoteIp
+	 *            원격지 IP 주소
+	 */
+	public void setRemoteIp(InetAddress remoteIp) {
+		this.remoteIp = remoteIp;
 	}
 
 	/**

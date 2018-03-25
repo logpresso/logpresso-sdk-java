@@ -21,8 +21,18 @@ import java.nio.ByteBuffer;
 import java.text.ParseException;
 import java.text.ParsePosition;
 import java.text.SimpleDateFormat;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
 import java.util.Map.Entry;
+import java.util.NoSuchElementException;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.CopyOnWriteArraySet;
@@ -37,16 +47,16 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
+import org.araqne.api.InetAddresses;
 import org.araqne.api.PrimitiveConverter;
 import org.araqne.codec.EncodingRule;
 import org.araqne.codec.FastEncodingRule;
+import org.araqne.websocket.Base64;
 
 import com.logpresso.client.http.WebSocketTransport;
 import com.logpresso.client.http.impl.StreamingResultDecoder;
 import com.logpresso.client.http.impl.StreamingResultEncoder;
 import com.logpresso.client.http.impl.TrapListener;
-
-import org.araqne.websocket.Base64;
 
 /**
  * <p>
@@ -197,6 +207,36 @@ public class Logpresso implements TrapListener, Closeable {
 	}
 
 	/**
+	 * 시스템에서 실행 중인 모든 쿼리 목록을 조회합니다. 관리자 권한이 필요합니다.
+	 * 
+	 * @return 시스템에서 실행 중인 모든 쿼리 목록이 Query 개체의 리스트로 반환됩니다.
+	 * @since 1.0.1
+	 */
+	public List<Query> getAllQueries() throws IOException {
+		try {
+			Message resp = rpc("org.araqne.logdb.msgbus.LogQueryPlugin.allQueries");
+
+			@SuppressWarnings("unchecked")
+			List<Map<String, Object>> l = (List<Map<String, Object>>) resp.getParameters().get("queries");
+
+			List<Query> allQueries = new ArrayList<Query>();
+			for (Map<String, Object> q : l) {
+				int queryId = (Integer) q.get("id");
+				Query query = new Query(this, queryId, (String) q.get("query_string"));
+				parseQueryStatus(q, query);
+				allQueries.add(query);
+			}
+
+			return allQueries;
+		} catch (MessageException e) {
+			if (e.getMessage() != null && e.getMessage().startsWith("msgbus-handler-not-found"))
+				throw new UnsupportedOperationException("araqne-logdb version should be >= 3.6.4");
+
+			throw e;
+		}
+	}
+
+	/**
 	 * 현재 세션에서 실행 중인 로그 쿼리 목록을 조회합니다. 포어그라운드와 백그라운드 실행 중인 모든 쿼리 정보가 반환됩니다.
 	 * 
 	 * @return 현재 세션에서 실행 중인 로그 쿼리 목록이 LogQuery 개체의 리스트로 반환됩니다.
@@ -266,9 +306,22 @@ public class Logpresso implements TrapListener, Closeable {
 			commands.add(parseCommand(cm));
 		}
 
+		query.setLoginName((String) q.get("login_name"));
+		query.setSource((String) q.get("source"));
+
+		String remoteIp = (String) q.get("remote_ip");
+		if (remoteIp != null)
+			query.setRemoteIp(InetAddresses.forString(remoteIp));
+
 		long stamp = 0;
 		if (q.containsKey("stamp"))
 			stamp = Long.parseLong(q.get("stamp").toString());
+
+		if (q.get("rows") != null) {
+			Number count = (Number) q.get("rows");
+			if (count != null)
+				query.updateCount(count.longValue(), stamp);
+		}
 
 		query.setCommands(commands);
 		boolean end = (Boolean) q.get("is_end");
