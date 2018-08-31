@@ -58,7 +58,7 @@ public abstract class AbstractSession implements Session {
 			params.put("password", password);
 			params.put("use_error_return", true);
 
-			Message resp = rpc("org.araqne.logdb.msgbus.ManagementPlugin.login", params);
+			Message resp = rpc("org.araqne.logdb.msgbus.ManagementPlugin.login", params, 30000);
 			if (resp.containsKey("error_code")) {
 				String errorCode = resp.getString("error_code");
 				isLogin = false;
@@ -69,11 +69,19 @@ public abstract class AbstractSession implements Session {
 			isLogin = false;
 			if (e.getMessage() != null && e.getMessage().contains("msgbus-handler-not-found"))
 				throw new LoginFailureException("msgbus-handler-not-found");
+			else if (e.getMessage() != null && e.getMessage().contains("invalid password"))
+				throw new LoginFailureException("invalid-password");
+			else if (e.getMessage() != null && e.getMessage().contains("user-not-found"))
+				throw new LoginFailureException("user-not-found");
+			else if (e.getMessage() != null && e.getMessage().contains("remote access is not allowed"))
+				throw new LoginFailureException("remote-access-control");
 			else
 				throw e;
 		} catch (IOException t) {
 			isLogin = false;
 			throw t;
+		} catch (TimeoutException e) {
+			throw new IOException("login-timeout", e);
 		}
 	}
 

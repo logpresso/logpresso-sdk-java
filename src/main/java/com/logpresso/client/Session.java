@@ -59,7 +59,7 @@ public interface Session {
 	void login(String loginName, String password, boolean force) throws IOException;
 
 	/**
-	 * 로그프레소 로그인을 수행합니다. 
+	 * 로그프레소 로그인을 수행합니다. 로그인 타임아웃은 30초로 지정됩니다.
 	 * 
 	 * @param loginName
 	 *            계정 이름
