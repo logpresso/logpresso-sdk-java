@@ -40,6 +40,7 @@ public class Logger {
 	private String description;
 	private boolean passive;
 	private int interval;
+	private String cronSchedule;
 	private String startTime;
 	private String endTime;
 	private String status;
@@ -234,6 +235,25 @@ public class Logger {
 	 */
 	public void setInterval(int interval) {
 		this.interval = interval;
+	}
+
+	/**
+	 * CRON 문법으로 정의된 수집 일정을 반환합니다.
+	 * 
+	 * @return CRON 표현식
+	 */
+	public String getCronSchedule() {
+		return cronSchedule;
+	}
+
+	/**
+	 * CRON 문법으로 정의된 수집 일정을 설정합니다.
+	 * 
+	 * @param cronSchedule
+	 *            수집 일정 CRON 표현식
+	 */
+	public void setCronSchedule(String cronSchedule) {
+		this.cronSchedule = cronSchedule;
 	}
 
 	/**

@@ -1744,6 +1744,7 @@ public class Logpresso implements TrapListener, Closeable {
 		lo.setDescription((String) m.get("description"));
 		lo.setPassive((Boolean) m.get("is_passive"));
 		lo.setInterval((Integer) m.get("interval"));
+		lo.setCronSchedule((String) m.get("cron_schedule"));
 		lo.setStartTime((String) m.get("start_time"));
 		lo.setEndTime((String) m.get("end_time"));
 		lo.setStatus((String) m.get("status"));
@@ -2475,6 +2476,42 @@ public class Logpresso implements TrapListener, Closeable {
 		rpc("org.araqne.logdb.msgbus.LogQueryPlugin.removeQuery", params);
 
 		queries.remove(id);
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<Workflow> listWorkflows() throws IOException {
+		Map<String, Object> params = new HashMap<String, Object>();
+		Message resp = rpc("com.logpresso.workflow.msgbus.WorkflowPlugin.getWorkflows", params);
+
+		List<Object> l = (List<Object>) resp.get("workflows");
+		List<Workflow> workflows = new ArrayList<Workflow>();
+		for (Object o : l) {
+			workflows.add(Workflow.parse((Map<String, Object>) o));
+		}
+		return workflows;
+	}
+
+	@SuppressWarnings("unchecked")
+	public Workflow getWorkflow(String guid) throws IOException {
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("guid", guid);
+		Message resp = rpc("com.logpresso.workflow.msgbus.WorkflowPlugin.getWorkflow", params);
+		return Workflow.parse((Map<String, Object>) resp.get("workflow"));
+	}
+
+	public void runWorkflow(String workflowGuid, Map<String, String> parameters) throws IOException {
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("guid", workflowGuid);
+		params.put("parameters", parameters);
+		rpc("com.logpresso.workflow.msgbus.WorkflowPlugin.runWorkflow", params);
+	}
+
+	public void runTask(String workflowGuid, String taskGuid, Map<String, String> parameters) throws IOException {
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("workflow_guid", workflowGuid);
+		params.put("task_guid", taskGuid);
+		params.put("parameters", parameters);
+		rpc("com.logpresso.workflow.msgbus.WorkflowPlugin.runTask", params);
 	}
 
 	public void addFailureListener(FailureListener listener) {
