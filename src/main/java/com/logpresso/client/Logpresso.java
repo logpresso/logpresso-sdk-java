@@ -2771,6 +2771,11 @@ public class Logpresso implements TrapListener, Closeable {
 	 * @since 0.9.5
 	 */
 	public void flush() {
+		Flusher f = flusher.get();
+		if (f == null)
+			return;
+		
+		f.signal();
 	}
 
 	private void flushInternal() {
