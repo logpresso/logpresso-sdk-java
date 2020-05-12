@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>logpresso</groupId>
 	<artifactId>logpresso-sdk-java</artifactId>
-	<version>1.0.0-5</version>
+	<version>1.0.0-6</version>
 	<packaging>jar</packaging>
 	<name>Logpresso SDK for Java</name>
 
@@ -47,7 +47,7 @@
 		<repository>
 			<id>araqne</id>
 			<name>Araqne</name>
-			<url>sftp://repo.logpresso.org:2222/home/service/araqne/</url>
+			<url>sftp://staging.araqne.org:2222/home/service/araqne/</url>
 		</repository>
 	</distributionManagement>
 

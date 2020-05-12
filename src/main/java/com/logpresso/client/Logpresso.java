@@ -2546,7 +2546,7 @@ public class Logpresso implements TrapListener, Closeable {
 
 		@Override
 		public boolean isDone() {
-			return false;
+			return l.getCount() == 0;
 		}
 
 		public void setDone() {
