@@ -189,7 +189,7 @@ public class WebSocketSession extends AbstractSession implements WebSocketListen
 			try {
 				synchronized (sendLock) {
 					// send msgbus ping
-					websocket.send("ping");
+					websocket.sendPing();
 				}
 			} catch (Throwable t) {
 				// ignore ping fail

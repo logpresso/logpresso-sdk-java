@@ -5,12 +5,12 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>logpresso</groupId>
 	<artifactId>logpresso-sdk-java</artifactId>
-	<version>1.0.0-6</version>
+	<version>1.1.0</version>
 	<packaging>jar</packaging>
 	<name>Logpresso SDK for Java</name>
 
 	<organization>
-		<name>Eediom, Inc</name>
+		<name>Logpresso, Inc</name>
 	</organization>
 
 	<properties>

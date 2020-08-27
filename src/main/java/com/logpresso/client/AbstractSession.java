@@ -136,10 +136,16 @@ public abstract class AbstractSession implements Session {
 	}
 
 	public void addListener(TrapListener listener) {
+		if (listener == null)
+			throw new IllegalArgumentException("trap listener should be not null");
+
 		listeners.add(listener);
 	}
 
 	public void removeListener(TrapListener listener) {
+		if (listener == null)
+			throw new IllegalArgumentException("trap listener should be not null");
+
 		listeners.remove(listener);
 	}
 

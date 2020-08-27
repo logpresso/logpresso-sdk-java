@@ -55,6 +55,12 @@ public class Query {
 	// @since 0.9.1
 	private List<SubQuery> subQueries = new ArrayList<SubQuery>();
 
+	// @since 1.1.0
+	private List<String> fieldOrder;
+
+	// @since 1.1.0
+	private List<FieldSummary> fieldSummary;
+
 	public Query(Logpresso client, int id, String queryString) {
 		this.client = client;
 		this.id = id;
@@ -346,6 +352,22 @@ public class Query {
 
 	public void setCancelReason(String cancelReason) {
 		this.cancelReason = cancelReason;
+	}
+
+	public List<String> getFieldOrder() {
+		return fieldOrder;
+	}
+
+	public void setFieldOrder(List<String> fieldOrder) {
+		this.fieldOrder = fieldOrder;
+	}
+
+	public List<FieldSummary> getFieldSummary() {
+		return fieldSummary;
+	}
+
+	public void setFieldSummary(List<FieldSummary> fieldSummary) {
+		this.fieldSummary = fieldSummary;
 	}
 
 	private class WaitingCondition {
