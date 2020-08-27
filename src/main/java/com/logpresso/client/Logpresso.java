@@ -1912,12 +1912,24 @@ public class Logpresso implements TrapListener, Closeable {
 	 * createQuery(), startQuery(), stopQuery(), removeQuery(), getResult() 메소드
 	 * 조합을 사용하십시오.
 	 * 
-	 * @param queryString
-	 *            쿼리 문자열 (NULL 허용 안 함)
+	 * @param queryString 쿼리 문자열 (NULL 허용 안 함)
+	 * @param summary     쿼리 결과에 대한 요약 정보 생성
 	 * @return 쿼리 결과를 조회할 수 있는 커서가 반환됩니다.
 	 */
 	public Cursor query(String queryString) throws IOException {
-		int id = createQuery(queryString);
+		return query(queryString, false);
+	}
+
+	public Cursor queryWithSummary(String queryString) throws IOException {
+		return query(queryString, true);
+	}
+
+	private Cursor query(String queryString, boolean summary) throws IOException {
+		QueryRequest req = new QueryRequest();
+		req.setQueryString(queryString);
+		req.setUseSummary(summary);
+
+		int id = createQuery(req);
 		startQuery(id);
 		Query q = queries.get(id);
 		q.waitUntil(null);
@@ -1932,12 +1944,15 @@ public class Logpresso implements TrapListener, Closeable {
 
 		long total = q.getLoadedCount();
 
-		return new LogCursorImpl(id, 0L, total, true, fetchSize);
+		if (summary)
+			q.setFieldSummary(getSummary(id));
+
+		return new LogCursorImpl(q, 0L, total, true, fetchSize);
 	}
 
 	private class LogCursorImpl implements Cursor {
 
-		private int id;
+		private Query query;
 		private long offset;
 		private long limit;
 		private boolean removeOnClose;
@@ -1949,8 +1964,8 @@ public class Logpresso implements TrapListener, Closeable {
 		private int fetchUnit;
 		private Map<String, Object> prefetch;
 
-		public LogCursorImpl(int id, long offset, long limit, boolean removeOnClose, int fetchUnit) {
-			this.id = id;
+		public LogCursorImpl(Query query, long offset, long limit, boolean removeOnClose, int fetchUnit) {
+			this.query = query;
 			this.offset = offset;
 			this.limit = limit;
 			this.removeOnClose = removeOnClose;
@@ -1958,6 +1973,21 @@ public class Logpresso implements TrapListener, Closeable {
 			this.p = offset;
 			this.nextCacheOffset = offset;
 			this.fetchUnit = fetchUnit;
+		}
+
+		@Override
+		public int getQueryId() {
+			return query.getId();
+		}
+
+		@Override
+		public List<String> getFieldOrder() {
+			return query.getFieldOrder();
+		}
+
+		@Override
+		public List<FieldSummary> getSummary() {
+			return new ArrayList<FieldSummary>(query.getFieldSummary());
 		}
 
 		@SuppressWarnings("unchecked")
@@ -1971,7 +2001,7 @@ public class Logpresso implements TrapListener, Closeable {
 
 			try {
 				if (cached == null || p >= currentCacheOffset + fetchUnit) {
-					cached = getResult(id, nextCacheOffset, fetchUnit);
+					cached = getResult(query.getId(), nextCacheOffset, fetchUnit);
 					currentCacheOffset = nextCacheOffset;
 					nextCacheOffset += fetchUnit;
 				}
@@ -2008,7 +2038,7 @@ public class Logpresso implements TrapListener, Closeable {
 		@Override
 		public void close() throws IOException {
 			if (removeOnClose)
-				removeQuery(id);
+				removeQuery(query.getId());
 		}
 	}
 
@@ -2396,6 +2426,18 @@ public class Logpresso implements TrapListener, Closeable {
 	 * @since 0.9.1
 	 */
 	public int createQuery(String queryString, StreamingResultSet rs, Map<String, Object> queryContext) throws IOException {
+		QueryRequest req = new QueryRequest();
+		req.setQueryString(queryString);
+		req.setStreamingResultSet(rs);
+		req.setQueryContext(queryContext);
+		return createQuery(req);
+	}
+
+	@SuppressWarnings("unchecked")
+	private int createQuery(QueryRequest req) throws IOException {
+		String queryString = req.getQueryString();
+		Map<String, Object> queryContext = req.getQueryContext();
+		StreamingResultSet rs = req.getStreamingResultSet();
 
 		String queryContextEncoded = null;
 		if (queryContext != null) {
@@ -2407,6 +2449,7 @@ public class Logpresso implements TrapListener, Closeable {
 		params.put("query", queryString);
 		params.put("source", "java-client");
 		params.put("context", queryContextEncoded);
+		params.put("use_summary", req.isUseSummary());
 
 		Message resp = rpc("org.araqne.logdb.msgbus.LogQueryPlugin.createQuery", params);
 		int id = resp.getInt("id");
@@ -2418,7 +2461,15 @@ public class Logpresso implements TrapListener, Closeable {
 			session.registerTrap("logdb-query-result-" + id);
 		}
 
-		queries.putIfAbsent(id, new Query(this, id, queryString));
+		Query query = new Query(this, id, queryString);
+
+		if (resp.get("field_order") != null)
+			query.setFieldOrder((List<String>) resp.get("field_order"));
+
+		Query old = queries.putIfAbsent(id, query);
+		if (old != null)
+			throw new IllegalStateException("duplicated query id " + id);
+
 		return id;
 	}
 
@@ -2893,6 +2944,27 @@ public class Logpresso implements TrapListener, Closeable {
 		int uncompressedSize = (Integer) resp.getParameters().get("uncompressed_size");
 		String binary = (String) resp.getParameters().get("binary");
 		return decodeBinary(binary, uncompressedSize);
+	}
+
+	@SuppressWarnings("unchecked")
+	public List<FieldSummary> getSummary(int id) throws IOException {
+		verifyQueryId(id);
+
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("id", id);
+
+		Message resp = rpc("org.araqne.logdb.msgbus.LogQueryPlugin.getSummary", params);
+		if (resp.get("summary") == null)
+			return null;
+
+		List<FieldSummary> fields = new ArrayList<FieldSummary>();
+		List<Object> l = (List<Object>) resp.get("summary");
+		for (Object o : l) {
+			Map<String, Object> m = (Map<String, Object>) o;
+			fields.add(FieldSummary.parse(m));
+		}
+
+		return fields;
 	}
 
 	private Map<String, Object> decodeBinary(String binary, int uncompressedSize) {
