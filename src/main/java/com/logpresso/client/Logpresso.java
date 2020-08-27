@@ -1925,8 +1925,7 @@ public class Logpresso implements TrapListener, Closeable {
 	}
 
 	private Cursor query(String queryString, boolean summary) throws IOException {
-		QueryRequest req = new QueryRequest();
-		req.setQueryString(queryString);
+		QueryRequest req = new QueryRequest(queryString);
 		req.setUseSummary(summary);
 
 		int id = createQuery(req);
@@ -2426,15 +2425,23 @@ public class Logpresso implements TrapListener, Closeable {
 	 * @since 0.9.1
 	 */
 	public int createQuery(String queryString, StreamingResultSet rs, Map<String, Object> queryContext) throws IOException {
-		QueryRequest req = new QueryRequest();
-		req.setQueryString(queryString);
+		QueryRequest req = new QueryRequest(queryString);
 		req.setStreamingResultSet(rs);
 		req.setQueryContext(queryContext);
 		return createQuery(req);
 	}
 
+	/**
+	 * 주어진 쿼리 요청 객체를 사용하여 새 쿼리를 생성합니다. 권한이 없거나 문법이 틀린 경우 예외가 발생합니다.
+	 * 
+	 * @param req 쿼리 요청 (NULL 허용 안 함)
+	 * @since 1.1.0
+	 */
 	@SuppressWarnings("unchecked")
-	private int createQuery(QueryRequest req) throws IOException {
+	public int createQuery(QueryRequest req) throws IOException {
+		if (req == null)
+			throw new IllegalArgumentException("req should be not null");
+
 		String queryString = req.getQueryString();
 		Map<String, Object> queryContext = req.getQueryContext();
 		StreamingResultSet rs = req.getStreamingResultSet();
@@ -2893,6 +2900,15 @@ public class Logpresso implements TrapListener, Closeable {
 	}
 
 	/**
+	 * 특정 쿼리가 종료할 때까지 현재 스레드를 대기(blocking) 합니다. 쿼리가 완료 혹은 취소되면 스레드 대기 상태가 풀립니다.
+	 * 
+	 * @param id 쿼리 ID
+	 */
+	public void waitUntil(int id) {
+		waitUntil(id, null);
+	}
+
+	/**
 	 * 특정 쿼리에 대해서 주어진 쿼리 결과 갯수가 조회 가능할 때까지 현재 스레드를 대기(blocking) 합니다. 주어진 쿼리 결과
 	 * 갯수를 채우지 못하더라도 쿼리가 완료 혹은 취소되면 스레드 대기 상태가 풀립니다. 이 메소드를 이용하면 매번 getQuery()를
 	 * 사용하여 서버에 폴링하지 않더라도 원하는 시점까지 대기할 수 있으며 서버 부하도 감소합니다.
@@ -2944,6 +2960,30 @@ public class Logpresso implements TrapListener, Closeable {
 		int uncompressedSize = (Integer) resp.getParameters().get("uncompressed_size");
 		String binary = (String) resp.getParameters().get("binary");
 		return decodeBinary(binary, uncompressedSize);
+	}
+
+	/**
+	 * 필드 정렬 순서를 반환합니다. 필드 정렬 순서에 표시된 필드가 쿼리 결과에 존재하지 않을 수 있으며, 쿼리 결과의 모든 필드를 나열하지
+	 * 않습니다. 필드 정렬 순서는 실제 출력 필드에서 고려되어야 할 순서를 의미하므로, 필드 정렬 순서에 나타나지 않은 결과 필드는 사전순으로
+	 * 정렬해야 합니다.
+	 * 
+	 * @param id 쿼리 ID
+	 * @return 필드 정렬 순서 목록. 필드 정렬 순서가 정의되지 않은 경우 null을 반환합니다.
+	 */
+	@SuppressWarnings("unchecked")
+	public List<String> getFieldOrder(int id) throws IOException {
+		verifyQueryId(id);
+
+		Map<String, Object> params = new HashMap<String, Object>();
+		params.put("id", id);
+		params.put("offset", 0);
+		params.put("limit", 1);
+
+		Message resp = rpc("org.araqne.logdb.msgbus.LogQueryPlugin.getResult", params);
+		if (resp.getParameters().size() == 0)
+			throw new MessageException("query-not-found", "", resp.getParameters());
+
+		return (List<String>) resp.get("field_order");
 	}
 
 	@SuppressWarnings("unchecked")

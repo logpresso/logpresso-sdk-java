@@ -8,12 +8,12 @@ public class QueryRequest {
 	private Map<String, Object> queryContext;
 	private boolean useSummary;
 
-	public String getQueryString() {
-		return queryString;
+	public QueryRequest(String queryString) {
+		this.queryString = queryString;
 	}
 
-	public void setQueryString(String queryString) {
-		this.queryString = queryString;
+	public String getQueryString() {
+		return queryString;
 	}
 
 	public StreamingResultSet getStreamingResultSet() {
