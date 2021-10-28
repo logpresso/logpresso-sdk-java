@@ -5,7 +5,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>logpresso</groupId>
 	<artifactId>logpresso-sdk-java</artifactId>
-	<version>1.0.0-6</version>
+	<version>1.0.0-7</version>
 	<packaging>jar</packaging>
 	<name>Logpresso SDK for Java</name>
 
@@ -36,7 +36,7 @@
 			<id>araqne</id>
 			<name>Araqne Maven Repository</name>
 			<layout>default</layout>
-			<url>http://staging.araqne.org/</url>
+			<url>https://staging.araqne.org/</url>
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
@@ -47,7 +47,7 @@
 		<repository>
 			<id>araqne</id>
 			<name>Araqne</name>
-			<url>sftp://staging.araqne.org:2222/home/service/araqne/</url>
+			<url>sftp://staging.araqne.org/home/service/araqne/</url>
 		</repository>
 	</distributionManagement>
 

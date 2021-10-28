@@ -45,7 +45,8 @@ import com.logpresso.client.Message.Type;
 public class WebSocketSession extends AbstractSession implements WebSocketListener {
 	private static final int DEFAULT_READ_TIMEOUT = 10000;
 	private final Logger logger = LoggerFactory.getLogger(WebSocketSession.class);
-	private final Logger sendLog = LoggerFactory.getLogger("websocket-send");
+	private final Logger recvLog = LoggerFactory.getLogger(WebSocketSession.class.getName()+"-recv");
+	private final Logger sendLog = LoggerFactory.getLogger(WebSocketSession.class.getName()+"-send");
 	private Object sendLock = new Object();
 	private WebSocket websocket;
 	private WebSocketBlockingTable table = new WebSocketBlockingTable(this);
@@ -99,7 +100,8 @@ public class WebSocketSession extends AbstractSession implements WebSocketListen
 		String json = MessageCodec.encode(req);
 
 		synchronized (sendLock) {
-			sendLog.debug("logpresso: send rpc [{}]", json);
+			if (sendLog.isDebugEnabled())
+				sendLog.debug("logpresso: send rpc [{}]", json);
 			websocket.send(json);
 		}
 
@@ -127,7 +129,8 @@ public class WebSocketSession extends AbstractSession implements WebSocketListen
 			return;
 
 		Message m = MessageCodec.decode(json);
-		logger.debug("logpresso: received {}", msg.getData());
+		if (recvLog.isDebugEnabled())
+			recvLog.debug("logpresso: received {}", msg.getData());
 
 		if (m.getType() == Type.Response)
 			table.signal(m.getRequestId(), m);

@@ -6,3 +6,4 @@ target
 *.versionsBackup
 bin
 git.properties
+examples
