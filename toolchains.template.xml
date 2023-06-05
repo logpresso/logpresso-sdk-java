@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF8"?>
+<toolchains>
+	<!-- JDK toolchains -->
+	<toolchain>
+		<type>jdk</type>
+		<provides>
+			<version>7</version>
+			<vendor>sun</vendor>
+		</provides>
+		<configuration>
+			<jdkHome>/home/stania/jdk/jdk1.7.0_80</jdkHome>
+		</configuration>
+	</toolchain>
+</toolchains>

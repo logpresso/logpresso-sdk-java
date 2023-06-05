@@ -61,6 +61,26 @@
 	<build>
 		<plugins>
 			<plugin>
+				<?m2e ignore?>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-toolchains-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals>
+							<goal>toolchain</goal>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<toolchains>
+						<jdk>
+							<version>7</version>
+							<vendor>sun</vendor>
+						</jdk>
+					</toolchains>
+				</configuration>
+			</plugin>
+			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.3</version>
@@ -181,7 +201,7 @@
 		<dependency>
 			<groupId>org.araqne</groupId>
 			<artifactId>araqne-websocket</artifactId>
-			<version>0.3.0</version>
+			<version>0.3.1</version>
 		</dependency>
 		<dependency>
 			<groupId>org.araqne</groupId>
